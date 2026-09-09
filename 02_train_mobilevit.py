@@ -68,13 +68,17 @@ class RandomJPEGCompression:
 
 
 class DetectorModel(nn.Module):
-    """Wrapper MobileViT + classifier head, mengikuti pola yang sama dengan
-    DetectorModel di skripsi utama supaya konsisten cara pemanggilannya."""
+    """Wrapper backbone (MobileViT ATAU arsitektur lain) + classifier head.
+    Backbone dibuat configurable supaya baseline (mis. MobileNetV2) bisa
+    dilatih dengan pipeline & hyperparameter yang IDENTIK -- perbandingan adil,
+    persis prinsip yang dipakai di skripsi utama (baseline vs CBAM)."""
 
-    def __init__(self, num_classes=2, dropout=0.3):
+    def __init__(self, num_classes=2, backbone_name=None, dropout=0.3):
         super().__init__()
+        backbone_name = backbone_name or BACKBONE_NAME
+        self.backbone_name = backbone_name
         self.backbone = timm.create_model(
-            BACKBONE_NAME, pretrained=True, num_classes=0, global_pool="avg"
+            backbone_name, pretrained=True, num_classes=0, global_pool="avg"
         )
         with torch.no_grad():
             dummy = torch.randn(1, 3, IMG_SIZE, IMG_SIZE)
@@ -123,7 +127,7 @@ def build_dataloaders(data_dir, robust_aug=False):
     return loaders, sizes, train_ds.classes
 
 
-def train(model, loaders, sizes, device, tag, use_mlflow=False, mlflow_run_name=None):
+def train(model, loaders, sizes, device, tag, backbone_name, use_mlflow=False, mlflow_run_name=None):
     criterion = nn.CrossEntropyLoss(label_smoothing=LABEL_SMOOTHING)
     optimizer = optim.AdamW(model.parameters(), lr=LR, weight_decay=WEIGHT_DECAY)
     scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=EPOCHS)
@@ -138,7 +142,7 @@ def train(model, loaders, sizes, device, tag, use_mlflow=False, mlflow_run_name=
         mlflow_ctx = mlflow.start_run(run_name=mlflow_run_name or f"Training_{tag}")
         mlflow_ctx.__enter__()
         mlflow.log_param("model_tag", tag)
-        mlflow.log_param("backbone", BACKBONE_NAME)
+        mlflow.log_param("backbone", backbone_name)
         mlflow.log_param("learning_rate", LR)
         mlflow.log_param("batch_size", BATCH_SIZE)
         mlflow.log_param("epochs", EPOCHS)
@@ -195,10 +199,17 @@ def train(model, loaders, sizes, device, tag, use_mlflow=False, mlflow_run_name=
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--data_dir", required=True)
+    ap.add_argument("--backbone", default="mobilevit_s",
+                     help="Nama model timm. Default: mobilevit_s. Untuk baseline pembanding, "
+                          "pakai 'mobilenetv2_100' -- hyperparameter lain TETAP SAMA demi keadilan.")
     ap.add_argument("--tag", default="mobilevit",
                      help="Nama tag untuk checkpoint & MLflow run, mis. 'mobilevit_lab' atau 'mobilevit_field'")
-    ap.add_argument("--dagshub_repo_owner", default=None)
-    ap.add_argument("--dagshub_repo_name", default=None)
+    ap.add_argument("--dagshub_repo_owner", default="Bedi002",
+                     help="Default: Bedi002 (ubah kalau perlu ganti akun)")
+    ap.add_argument("--dagshub_repo_name", default="MobileVIT-Robusta",
+                     help="Default: MobileVIT-Robusta (ubah kalau perlu ganti repo)")
+    ap.add_argument("--no_dagshub", action="store_true",
+                     help="Matikan koneksi DagsHub sama sekali untuk run ini (mis. buat tes cepat offline)")
     ap.add_argument("--robust_aug", action="store_true")
     args = ap.parse_args()
 
@@ -207,10 +218,10 @@ def main():
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"Perangkat aktif: {device}")
-    print(f"Backbone: {BACKBONE_NAME}")
+    print(f"Backbone: {args.backbone}")
 
     use_mlflow = False
-    if args.dagshub_repo_owner and args.dagshub_repo_name:
+    if not args.no_dagshub and args.dagshub_repo_owner and args.dagshub_repo_name:
         import dagshub
         import mlflow
         dagshub.init(repo_owner=args.dagshub_repo_owner,
@@ -224,11 +235,11 @@ def main():
     loaders, sizes, classes = build_dataloaders(args.data_dir, robust_aug=args.robust_aug)
     print(f"Kelas: {classes} | Train: {sizes['train']} | Valid: {sizes['valid']} | Test: {sizes['test']}")
 
-    model = DetectorModel(num_classes=len(classes)).to(device)
+    model = DetectorModel(num_classes=len(classes), backbone_name=args.backbone).to(device)
     n_params = sum(p.numel() for p in model.parameters())
     print(f"Jumlah parameter: {n_params:,}")
 
-    train(model, loaders, sizes, device, tag=args.tag, use_mlflow=use_mlflow,
+    train(model, loaders, sizes, device, tag=args.tag, backbone_name=args.backbone, use_mlflow=use_mlflow,
           mlflow_run_name=f"Training_{args.tag}")
 
 

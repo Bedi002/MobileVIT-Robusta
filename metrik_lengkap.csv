@@ -1,0 +1,17 @@
+arsitektur,skenario,kelas,precision,recall,f1_score,support,akurasi_keseluruhan
+MobileViT,VALID (lab),sakit,0.9483,0.9821,0.9649,112.0,0.9655
+MobileViT,VALID (lab),sehat,0.9828,0.9500,0.9661,120.0,0.9655
+MobileViT,TEST field mentah,sakit,0.6571,0.9664,0.7823,119.0,0.7288
+MobileViT,TEST field mentah,sehat,0.9344,0.4872,0.6404,117.0,0.7288
+MobileViT,TEST_SEGMENTED (anotasi manual),sakit,0.9580,0.9580,0.9580,119.0,0.9576
+MobileViT,TEST_SEGMENTED (anotasi manual),sehat,0.9573,0.9573,0.9573,117.0,0.9576
+MobileViT,PIPELINE deployment (auto-segment),sakit,0.9741,0.9496,0.9617,119.0,0.9619
+MobileViT,PIPELINE deployment (auto-segment),sehat,0.9500,0.9744,0.9620,117.0,0.9619
+MobileNetV2,VALID (lab),sakit,0.9714,0.9107,0.9401,112.0,0.9440
+MobileNetV2,VALID (lab),sehat,0.9213,0.9750,0.9474,120.0,0.9440
+MobileNetV2,TEST field mentah,sakit,0.7669,0.8571,0.8095,119.0,0.7966
+MobileNetV2,TEST field mentah,sehat,0.8350,0.7350,0.7818,117.0,0.7966
+MobileNetV2,TEST_SEGMENTED (anotasi manual),sakit,0.9906,0.8824,0.9333,119.0,0.9364
+MobileNetV2,TEST_SEGMENTED (anotasi manual),sehat,0.8923,0.9915,0.9393,117.0,0.9364
+MobileNetV2,PIPELINE deployment (auto-segment),sakit,0.9900,0.8319,0.9041,119.0,0.9110
+MobileNetV2,PIPELINE deployment (auto-segment),sehat,0.8529,0.9915,0.9170,117.0,0.9110

@@ -1,0 +1,7 @@
+arsitektur,train_seed,akurasi_test_field,akurasi_pipeline
+MobileViT,42,0.7669,0.9661
+MobileViT,123,0.8263,0.9576
+MobileViT,2024,0.7627,0.9492
+MobileNetV2,42,0.7034,0.9364
+MobileNetV2,123,0.7458,0.9280
+MobileNetV2,2024,0.7627,0.9195
