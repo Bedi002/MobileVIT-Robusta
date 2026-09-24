@@ -20,12 +20,12 @@ CLASSES = ["sakit", "sehat"]
 # Perbarui path model agar mengarah ke folder checkpoints
 MODEL_FILES = {
     "MobileNetV2": {
-        "path": os.path.join(CHECKPOINT_DIR, "best_mobilenetv2_100_trainseed2024_model.pth"),
+        "path": os.path.join(CHECKPOINT_DIR, "best_mobilenetv2_100_trainseed42_model.pth"),
         "backbone": "mobilenetv2_100",
         "features": 1280,
     },
     "MobileViT-S": {
-        "path": os.path.join(CHECKPOINT_DIR, "best_mobilevit_s_trainseed2024_model.pth"),
+        "path": os.path.join(CHECKPOINT_DIR, "best_mobilevit_s_trainseed42_model.pth"),
         "backbone": "mobilevit_s",
         "features": 640,
     },
