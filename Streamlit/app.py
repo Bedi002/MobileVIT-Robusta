@@ -5,20 +5,27 @@ import timm
 import torchvision.transforms as T
 from PIL import Image
 import pandas as pd
+import os # Tambahkan import os
+
+# Dapatkan direktori tempat app.py berada (folder Streamlit)
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+# Arahkan ke folder checkpoints (mundur 1 folder, lalu masuk ke 'checkpoints')
+CHECKPOINT_DIR = os.path.join(BASE_DIR, "..", "checkpoints")
 
 # Konfigurasi Halaman Streamlit
 st.set_page_config(page_title="Klasifikasi Penyakit Daun Kopi", page_icon="🍃", layout="wide")
 
 CLASSES = ["sakit", "sehat"]
 
+# Perbarui path model agar mengarah ke folder checkpoints
 MODEL_FILES = {
     "MobileNetV2": {
-        "path": "best_mobilenetv2_100_trainseed2024_model.pth",
+        "path": os.path.join(CHECKPOINT_DIR, "best_mobilenetv2_100_trainseed2024_model.pth"),
         "backbone": "mobilenetv2_100",
         "features": 1280,
     },
     "MobileViT-S": {
-        "path": "best_mobilevit_s_trainseed2024_model.pth",
+        "path": os.path.join(CHECKPOINT_DIR, "best_mobilevit_s_trainseed2024_model.pth"),
         "backbone": "mobilevit_s",
         "features": 640,
     },
